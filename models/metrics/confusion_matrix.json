@@ -1,0 +1,17 @@
+{
+  "matrix": [
+    [
+      159945,
+      3224
+    ],
+    [
+      356,
+      777
+    ]
+  ],
+  "labels": [
+    "Normal/Light",
+    "Heavy Rain (>=64.5mm)"
+  ],
+  "threshold": 0.5
+}

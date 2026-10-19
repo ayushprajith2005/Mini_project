@@ -1,0 +1,94 @@
+[
+  {
+    "feature": "min_temp",
+    "mean_abs_shap": 0.7662
+  },
+  {
+    "feature": "rainfall_roll3_sum",
+    "mean_abs_shap": 0.7214
+  },
+  {
+    "feature": "rainfall_roll7_sum",
+    "mean_abs_shap": 0.6515
+  },
+  {
+    "feature": "day_of_year_cos",
+    "mean_abs_shap": 0.5311
+  },
+  {
+    "feature": "temp_roll3_mean",
+    "mean_abs_shap": 0.5235
+  },
+  {
+    "feature": "rainfall_lag1",
+    "mean_abs_shap": 0.5174
+  },
+  {
+    "feature": "avg_temp",
+    "mean_abs_shap": 0.437
+  },
+  {
+    "feature": "elevation",
+    "mean_abs_shap": 0.3807
+  },
+  {
+    "feature": "air_pressure",
+    "mean_abs_shap": 0.3499
+  },
+  {
+    "feature": "pressure_drop_3d",
+    "mean_abs_shap": 0.3008
+  },
+  {
+    "feature": "max_temp",
+    "mean_abs_shap": 0.2881
+  },
+  {
+    "feature": "month",
+    "mean_abs_shap": 0.2454
+  },
+  {
+    "feature": "temp_range",
+    "mean_abs_shap": 0.2284
+  },
+  {
+    "feature": "latitude",
+    "mean_abs_shap": 0.2192
+  },
+  {
+    "feature": "day_of_year_sin",
+    "mean_abs_shap": 0.1909
+  },
+  {
+    "feature": "wind_convective_proxy",
+    "mean_abs_shap": 0.1523
+  },
+  {
+    "feature": "relative_humidity_est",
+    "mean_abs_shap": 0.1406
+  },
+  {
+    "feature": "is_monsoon",
+    "mean_abs_shap": 0.1309
+  },
+  {
+    "feature": "longitude",
+    "mean_abs_shap": 0.109
+  },
+  {
+    "feature": "vapor_pressure_deficit",
+    "mean_abs_shap": 0.086
+  },
+  {
+    "feature": "rainfall_lag2",
+    "mean_abs_shap": 0.0639
+  },
+  {
+    "feature": "wind_speed",
+    "mean_abs_shap": 0.06
+  },
+  {
+    "feature": "is_post_monsoon",
+    "mean_abs_shap": 0.0014
+  }
+]

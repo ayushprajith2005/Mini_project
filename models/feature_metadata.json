@@ -1,0 +1,40 @@
+{
+  "feature_columns": [
+    "avg_temp",
+    "min_temp",
+    "max_temp",
+    "temp_range",
+    "relative_humidity_est",
+    "vapor_pressure_deficit",
+    "air_pressure",
+    "pressure_drop_3d",
+    "wind_speed",
+    "wind_convective_proxy",
+    "elevation",
+    "latitude",
+    "longitude",
+    "rainfall_lag1",
+    "rainfall_lag2",
+    "rainfall_roll3_sum",
+    "rainfall_roll7_sum",
+    "temp_roll3_mean",
+    "day_of_year_sin",
+    "day_of_year_cos",
+    "month",
+    "is_monsoon",
+    "is_post_monsoon"
+  ],
+  "threshold_heavy_mm": 64.5,
+  "threshold_very_heavy_mm": 115.6,
+  "metrics": {
+    "test_accuracy": 0.9782108556195299,
+    "test_precision": 0.1942014496375906,
+    "test_recall": 0.6857899382171226,
+    "test_f1": 0.30268796260225944,
+    "test_roc_auc": 0.9688021657454804,
+    "test_pr_auc": 0.343387849487461,
+    "test_recall_tuned_0.35": 0.7740511915269197,
+    "test_f1_tuned_0.35": 0.24017527043680678
+  },
+  "scale_pos_weight": 32.625373878364904
+}
