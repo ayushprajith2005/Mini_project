@@ -1,4 +1,3 @@
-docker-compose up --build
 # 🌧️ RainXplain: Explainable AI (XAI) System for Heavy Rain Event Prediction
 
 > **SDG 9: Industry, Innovation & Infrastructure** — Building climate-resilient early warning systems with glass-box Explainable AI (SHAP + LIME) for extreme rainfall and urban flood risk mitigation.
@@ -11,7 +10,7 @@ docker-compose up --build
 - **Very Heavy Rain**: $\ge 115.6 \text{ mm / 24 hr}$ (Red Alert)
 - **Extremely Heavy Rain**: $\ge 204.5 \text{ mm / 24 hr}$ (Extreme Contingency)
 
-Traditional weather forecasting often relies on complex numerical weather prediction (NWP) simulations or opaque deep learning models that fail to explain *why* an extreme alert was triggered. RainXplain bridges this gap by combining **gradient boosted decision trees (XGBoost)** with **Shapley Additive Explanations (SHAP)** and **Local Interpretable Model-agnostic Explanations (LIME)**, presented via an interactive, India-only geospatial map interface.
+Traditional weather forecasting often relies on complex numerical weather prediction (NWP) simulations or opaque deep learning models that fail to explain *why* an extreme alert was triggered. RainXplain bridges this gap by combining **gradient boosted decision trees (XGBoost)** with **Shapley Additive Explanations (SHAP)** and **Local Interpretable Model-agnostic Explanations (LIME)**, presented through a web app built with Vite + React and an India-only map.
 
 ---
 
@@ -46,9 +45,9 @@ Traditional weather forecasting often relies on complex numerical weather predic
 7. **Impact Estimation Layer (Completed)**:
    - Static Indian state population density dataset join (`src/impact.py`).
    - Evaluates urban flood vulnerability and displays localized infrastructure risk recommendations.
-8. **Admin Analytics & Governance Tab (Completed)**:
-   - Session-based login form protecting system governance metrics.
-   - Shows total predictions logged, risk level distribution bar chart, spatial query map, and alert history log.
+8. **Admin Analytics & Governance Screen (Completed)**:
+   - Login is checked by the API (`POST /admin/login`), which issues a token for `GET /admin/overview`. Credentials never ship in the browser bundle.
+   - Shows total predictions logged, risk level distribution, a map of queried regions, and the alert history log.
 
 ---
 
@@ -78,7 +77,7 @@ Configure the following environment variables (or set them in `.env`) for custom
 |  - India-Restricted Leaflet Map (Lat 6-38N, Lon 68-98E)                       |
 |  - Click-to-Autofill Station Baseline (Haversine BallTree)                    |
 |  - Parameter Simulation & Scenario Presets (Mumbai, Cherrapunji, Delhi, etc.) |
-|  - SHAP Feature Attribution Waterfall & LIME Decision Rule Visualizations    |
+|  - SHAP Key-Factor Chart, SHAP vs LIME Comparison, 5-Day Outlook              |
 +-------------------------------------------------------------------------------+
                                       │
                                       ▼ HTTP REST
@@ -87,7 +86,11 @@ Configure the following environment variables (or set them in `.env`) for custom
 |  - POST /predict    : Fast inference & risk classification                    |
 |  - POST /explain    : Full inference + SHAP TreeExplainer + LIME surrogate    |
 |  - POST /match-geo  : O(log N) nearest-station coordinate resolution          |
+|  - POST /forecast/multi-day : 5-day recursive risk outlook                     |
 |  - GET  /predictions/recent : Paginated audit trail retrieval                 |
+|  - GET  /metrics/performance : ROC, confusion matrix, global SHAP             |
+|  - POST /report/from-result : PDF for a result the client already holds       |
+|  - POST /admin/login, GET /admin/overview : Admin screen (token protected)    |
 +-------------------------------------------------------------------------------+
          │                                               │
          ▼ (Inference & Attribution)                     ▼ (Audit Persistence)
@@ -151,6 +154,30 @@ Every prediction is paired with two distinct levels of interpretation:
 
 ---
 
+## 🖥️ Web App
+
+The frontend lives in `frontend/` (Vite + React, plain JavaScript, Leaflet for the map). It is a single-page app with a side navigation:
+
+| Screen | What it does |
+|---|---|
+| **Predict** | Pick a location on the India map, set the weather conditions (or start from a scenario like *Mumbai storm*), and run a prediction. The result shows the probability against the 35% alert threshold, the estimated impact, and a "Why the model says this" panel with **Key factors** (SHAP), **SHAP vs LIME**, and a **5-day outlook**. Results can be downloaded as a PDF. |
+| **Prediction log** | Every prediction saved by the API, with search by station and a risk-level filter. |
+| **Model performance** | Plain-language summary of the test results, ROC curve, confusion matrix, and global feature importance. |
+| **About** | What the system does, why explanations matter, and how locations are matched. |
+| **Admin** | Login-protected usage stats, risk distribution, map of queried regions, and sent alerts. |
+
+**How it talks to the API:** the browser calls `/api/*`. In development, Vite forwards that to the FastAPI service (`API_URL`, default `http://127.0.0.1:8000`). In Docker, nginx does the same forwarding. To call a differently hosted API directly, build with `VITE_API_URL` set.
+
+**Map tiles:** Esri Light Gray Canvas (free, no API key). Change them in `frontend/src/tiles.js`.
+
+**Build for production:**
+```bash
+cd frontend
+npm run build        # outputs frontend/dist
+```
+
+---
+
 ## 🚀 Quickstart Guide
 
 ### Method A: Running with Pip / Local Environment
@@ -185,7 +212,7 @@ Every prediction is paired with two distinct levels of interpretation:
    npm install
    npm run dev
    ```
-   Open your browser at `http://localhost:5173`. The dev server forwards `/api/*` to the FastAPI
+   Requires Node 18 or newer. Open your browser at `http://localhost:5173`. The dev server forwards `/api/*` to the FastAPI
    service on port 8000 (set `API_URL` to point it elsewhere).
 
 6. **Run Unit & Integration Tests**:
@@ -229,10 +256,15 @@ To connect RainXplain with live Earth Observation satellite streams or real-time
 Mini_project/
 ├── api/
 │   ├── main.py                # FastAPI REST API endpoints
-│   └── db.py                  # SQLite logging and audit query helper
+│   ├── db.py                  # SQLite logging and audit query helper
+│   ├── alerts.py              # Email alert scheduler
+│   └── report.py              # PDF report generation
 ├── frontend/                  # Vite + React web app
 │   ├── src/pages/             # Predict, Prediction log, Model performance, About, Admin
 │   ├── src/components/        # Map, conditions form, result panel, shared UI
+│   ├── src/api.js             # All calls to the FastAPI service
+│   ├── src/index.css          # Design tokens and layout
+│   ├── vite.config.js         # Dev server and /api proxy
 │   └── nginx.conf             # Serves the build and proxies /api to FastAPI
 ├── data/
 │   ├── raw/                   # Original 6 CSVs/Parquet datasets
