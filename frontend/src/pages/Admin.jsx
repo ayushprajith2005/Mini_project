@@ -3,6 +3,7 @@ import { CircleMarker, MapContainer, TileLayer, Tooltip } from 'react-leaflet'
 import { adminLogin, adminOverview } from '../api'
 import { Notice, PageHeader } from '../components/ui'
 import { formatWhen } from '../format'
+import { ATTRIBUTION, TILES } from '../tiles'
 
 const TOKEN_KEY = 'rx_admin_token'
 const getToken = () => { try { return sessionStorage.getItem(TOKEN_KEY) } catch { return null } }
@@ -99,7 +100,7 @@ function Overview({ token, onLogout }) {
             <div className="panel-head"><h2 className="panel-title">Most queried regions</h2></div>
             <div className="map-box" style={{ height: 300 }}>
               <MapContainer center={[20.6, 78.9]} zoom={4} scrollWheelZoom={false}>
-                <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" attribution="&copy; OpenStreetMap contributors &copy; CARTO" />
+                <TileLayer url={TILES} attribution={ATTRIBUTION} />
                 {located.map((p) => (
                   <CircleMarker key={p.id} center={[p.latitude, p.longitude]} radius={5}
                     pathOptions={{ color: p.prediction === 1 ? '#b4400f' : '#0b6e8a', fillOpacity: 0.6 }}>

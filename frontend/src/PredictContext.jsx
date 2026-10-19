@@ -11,6 +11,9 @@ const DEFAULT_FORM = {
   pressure: 1008, wind: 10, avgTemp: 28, minTemp: 23.5, maxTemp: 33, elevation: 100, month: 7,
 }
 
+// Station data arrives with long decimals; show values the way a person would type them.
+const round = (v, fallback, digits = 1) => (v == null ? fallback : Math.round(v * 10 ** digits) / 10 ** digits)
+
 // Rain history defaults follow yesterday's rain unless the user has edited them.
 function withDerivedRain(form, rain1, touched) {
   const next = { ...form, rain1 }
@@ -33,12 +36,12 @@ export function PredictProvider({ children }) {
     setMatched(m)
     setForm((f) => ({
       ...f,
-      pressure: m.air_pressure ?? f.pressure,
-      wind: m.wind_speed ?? f.wind,
-      avgTemp: m.avg_temp ?? f.avgTemp,
-      minTemp: m.min_temp ?? f.minTemp,
-      maxTemp: m.max_temp ?? f.maxTemp,
-      elevation: m.elevation ?? f.elevation,
+      pressure: round(m.air_pressure, f.pressure),
+      wind: round(m.wind_speed, f.wind),
+      avgTemp: round(m.avg_temp, f.avgTemp),
+      minTemp: round(m.min_temp, f.minTemp),
+      maxTemp: round(m.max_temp, f.maxTemp),
+      elevation: round(m.elevation, f.elevation, 0),
     }))
   }, [])
 
@@ -63,10 +66,10 @@ export function PredictProvider({ children }) {
       setMatched(m)
       setForm((f) => withDerivedRain({
         ...f,
-        avgTemp: m.avg_temp ?? f.avgTemp,
-        minTemp: m.min_temp ?? f.minTemp,
-        maxTemp: m.max_temp ?? f.maxTemp,
-        elevation: m.elevation ?? f.elevation,
+        avgTemp: round(m.avg_temp, f.avgTemp),
+        minTemp: round(m.min_temp, f.minTemp),
+        maxTemp: round(m.max_temp, f.maxTemp),
+        elevation: round(m.elevation, f.elevation, 0),
         pressure: p.pressure,
         wind: p.wind,
         month: p.month,

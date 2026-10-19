@@ -5,8 +5,8 @@ import { getStations, subscribe } from '../api'
 import { INDIA_BOUNDS, usePredict } from '../PredictContext'
 import { Notice } from './ui'
 
-const TILES = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-const ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO'
+import { ATTRIBUTION, TILES } from '../tiles'
+
 const bounds = [[INDIA_BOUNDS.minLat, INDIA_BOUNDS.minLon], [INDIA_BOUNDS.maxLat, INDIA_BOUNDS.maxLon]]
 
 function pinIcon(hot) {
