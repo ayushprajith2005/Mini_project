@@ -14,19 +14,15 @@ services:
     networks:
       - rainxplain_net
 
-  dashboard:
+  frontend:
     build:
       context: .
-      dockerfile: Dockerfile.dashboard
-    container_name: rainxplain_dashboard
+      dockerfile: Dockerfile.frontend
+    container_name: rainxplain_frontend
     ports:
-      - "8501:8501"
-    environment:
-      - API_URL=http://api:8000
+      - "8080:80"
     depends_on:
       - api
-    volumes:
-      - ./data:/app/data
     restart: unless-stopped
     networks:
       - rainxplain_net

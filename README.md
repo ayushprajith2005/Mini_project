@@ -1,5 +1,4 @@
 docker-compose up --build
-
 # 🌧️ RainXplain: Explainable AI (XAI) System for Heavy Rain Event Prediction
 
 > **SDG 9: Industry, Innovation & Infrastructure** — Building climate-resilient early warning systems with glass-box Explainable AI (SHAP + LIME) for extreme rainfall and urban flood risk mitigation.
@@ -26,7 +25,7 @@ Traditional weather forecasting often relies on complex numerical weather predic
    - Pre-computed saved artifacts in `models/metrics/` loaded dynamically without retraining.
 2. **Automated Risk Alerting**:
    - `smtplib`-based email notification engine with graceful console/DB fallback logging.
-   - SQLite subscription registry (`subscriptions` table) and Streamlit subscription UI for any Indian region.
+   - SQLite subscription registry (`subscriptions` table) and an email-alert sign-up on the Predict screen for any Indian region.
    - Background APScheduler task re-evaluating active region subscriptions every hour.
    - Audited alert history logged to `alerts_sent` table and exposed via `GET /alerts/recent`.
 3. **Prediction Confidence & Anomaly Flagging**:
@@ -35,12 +34,12 @@ Traditional weather forecasting often relies on complex numerical weather predic
    - Prominently rendered warning badges in UI and returned in API responses as `confidence_flags`.
 4. **Downloadable PDF Executive Report**:
    - Single-page ReportLab PDF generation containing target location, risk tier, confidence flags, SHAP feature attribution table, and plain-language meteorological insight.
-   - Streamlit "Download PDF Report" button and backend REST endpoint `GET /report/{prediction_id}`.
+   - "Download PDF" button on the result panel, backed by `POST /report/from-result` and `GET /report/{prediction_id}`.
 
 ### Stretch Features Status
 5. **Multi-Day Rolling Forecast (Completed)**:
    - 5-day forward recursive risk trend estimation using lag-feature statistical updating.
-   - Interactive line chart in Streamlit dashboard labeled as recursive statistical estimate.
+   - 5-day outlook chart in the web app labeled as recursive statistical estimate.
 6. **SHAP vs LIME Comparison View (Completed)**:
    - Side-by-side comparison matrix showing top SHAP drivers vs LIME decision rules.
    - Automated synthesis note detailing feature consensus vs divergence.
@@ -64,8 +63,8 @@ Configure the following environment variables (or set them in `.env`) for custom
 | `SMTP_USER` | *(None)* | SMTP login username. |
 | `SMTP_PASS` | *(None)* | SMTP password / App Password. |
 | `ALERT_FROM_EMAIL` | `alerts@rainxplain.org` | Sender address for email alerts. |
-| `ADMIN_USER` | `admin` | Username for Streamlit Admin Analytics tab login. |
-| `ADMIN_PASSWORD` | `rainxplain123` | Password for Streamlit Admin Analytics tab login. |
+| `ADMIN_USER` | `admin` | Username for the Admin screen login (checked by the API). |
+| `ADMIN_PASSWORD` | `rainxplain123` | Password for the Admin screen login (checked by the API). |
 
 *Note: If no SMTP credentials are provided, alerting operates in log-based fallback mode without breaking.*
 
@@ -75,8 +74,8 @@ Configure the following environment variables (or set them in `.env`) for custom
 
 ```
 +-------------------------------------------------------------------------------+
-|                       Streamlit Frontend (Dashboard)                          |
-|  - India-Restricted Folium Map (Lat 6-38N, Lon 68-98E)                        |
+|                    Vite + React Frontend (frontend/)                          |
+|  - India-Restricted Leaflet Map (Lat 6-38N, Lon 68-98E)                       |
 |  - Click-to-Autofill Station Baseline (Haversine BallTree)                    |
 |  - Parameter Simulation & Scenario Presets (Mumbai, Cherrapunji, Delhi, etc.) |
 |  - SHAP Feature Attribution Waterfall & LIME Decision Rule Visualizations    |
@@ -180,11 +179,14 @@ Every prediction is paired with two distinct levels of interpretation:
    uvicorn api.main:app --host 127.0.0.1 --port 8000
    ```
 
-5. **Launch the Streamlit Dashboard**:
+5. **Launch the Web App (Vite + React)**:
    ```bash
-   streamlit run dashboard/app.py
+   cd frontend
+   npm install
+   npm run dev
    ```
-   Open your browser at `http://localhost:8501`.
+   Open your browser at `http://localhost:5173`. The dev server forwards `/api/*` to the FastAPI
+   service on port 8000 (set `API_URL` to point it elsewhere).
 
 6. **Run Unit & Integration Tests**:
    ```bash
@@ -195,11 +197,11 @@ Every prediction is paired with two distinct levels of interpretation:
 
 ### Method B: Running with Docker & Docker-Compose
 
-To launch both the FastAPI service and the Streamlit Dashboard in isolated network containers:
+To launch the FastAPI service and the web app (nginx serving the Vite build) in isolated network containers:
 ```bash
 docker-compose up --build
 ```
-- **Streamlit Dashboard**: `http://localhost:8501`
+- **Web app**: `http://localhost:8080`
 - **FastAPI Documentation / Swagger**: `http://localhost:8000/docs`
 
 ---
@@ -228,8 +230,10 @@ Mini_project/
 ├── api/
 │   ├── main.py                # FastAPI REST API endpoints
 │   └── db.py                  # SQLite logging and audit query helper
-├── dashboard/
-│   └── app.py                 # Streamlit interactive India map & XAI dashboard
+├── frontend/                  # Vite + React web app
+│   ├── src/pages/             # Predict, Prediction log, Model performance, About, Admin
+│   ├── src/components/        # Map, conditions form, result panel, shared UI
+│   └── nginx.conf             # Serves the build and proxies /api to FastAPI
 ├── data/
 │   ├── raw/                   # Original 6 CSVs/Parquet datasets
 │   └── processed/             # Cleaned Parquet data & region_lookup table
@@ -252,7 +256,7 @@ Mini_project/
 │   ├── test_train.py          # Smoke tests for model artifacts & outputs
 │   └── test_predict.py        # Unit tests for predict_and_explain API
 ├── Dockerfile.api             # Container definition for FastAPI service
-├── Dockerfile.dashboard       # Container definition for Streamlit dashboard
+├── Dockerfile.frontend        # Container definition for the Vite web app
 ├── docker-compose.yml         # Multi-container orchestration
 ├── requirements.txt           # Pinned Python package dependencies
 └── README.md                  # System documentation & technical spec

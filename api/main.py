@@ -7,7 +7,9 @@ import sys
 import json
 import logging
 import traceback
+import secrets
 from typing import Optional, List, Dict, Any
+from fastapi import Depends, Header
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Query, Response
@@ -300,6 +302,57 @@ def get_recent_logged_predictions(limit: int = Query(50, ge=1, le=200), offset: 
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ----------------- Admin & Report-from-result Endpoints ----------------- #
+
+ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "rainxplain123")
+_admin_tokens = set()
+
+
+class AdminLogin(BaseModel):
+    username: str
+    password: str
+
+
+def require_admin(authorization: Optional[str] = Header(None)):
+    token = (authorization or "").removeprefix("Bearer ").strip()
+    if token not in _admin_tokens:
+        raise HTTPException(status_code=401, detail="Admin login required.")
+
+
+@app.post("/admin/login", tags=["Admin"])
+def admin_login(body: AdminLogin):
+    ok = secrets.compare_digest(body.username, ADMIN_USER) and secrets.compare_digest(body.password, ADMIN_PASSWORD)
+    if not ok:
+        raise HTTPException(status_code=401, detail="Invalid credentials.")
+    token = secrets.token_urlsafe(32)
+    _admin_tokens.add(token)
+    return {"token": token}
+
+
+@app.get("/admin/overview", tags=["Admin"], dependencies=[Depends(require_admin)])
+def admin_overview():
+    """Usage stats, recent predictions and sent alerts for the admin screen."""
+    return {
+        "stats": get_db_stats(),
+        "predictions": get_recent_predictions(limit=100),
+        "alerts": get_recent_alerts(limit=50),
+    }
+
+
+@app.post("/report/from-result", tags=["Reports"])
+def report_from_result(result: Dict[str, Any]):
+    """Builds the PDF for a prediction result the client already holds (no re-run, no new log row)."""
+    try:
+        return Response(
+            content=generate_pdf_report(result),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=RainXplain_Report.pdf"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
